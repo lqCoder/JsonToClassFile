@@ -679,15 +679,15 @@
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
                     <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="Tpb-hB-9YF">
-                        <rect key="frame" x="9" y="466" width="76" height="17"/>
-                        <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="ClassName:" id="fHm-Dx-e8U">
+                        <rect key="frame" x="9" y="466" width="171" height="17"/>
+                        <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="生成的类文件名 ClassName:" id="fHm-Dx-e8U">
                             <font key="font" metaFont="system"/>
                             <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
                             <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                         </textFieldCell>
                     </textField>
                     <textField verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="Bv8-Yo-nQI">
-                        <rect key="frame" x="91" y="461" width="224" height="22"/>
+                        <rect key="frame" x="186" y="461" width="224" height="22"/>
                         <constraints>
                             <constraint firstAttribute="width" constant="224" id="eb7-13-zTX"/>
                         </constraints>
