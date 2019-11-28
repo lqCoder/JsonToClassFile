@@ -8,12 +8,15 @@
 #import "AppDelegate.h"
 #import "CreateFileModel.h"
 #import "JSONKit.h"
+#import "MJExtension.h"
+#import "TestModel.h"
 
-@interface AppDelegate ()
+@interface AppDelegate ()<NSTextViewDelegate>
 @property (weak) IBOutlet NSTextField* classText;
 @property (weak) IBOutlet NSWindow* window;
 
 @property (weak) IBOutlet NSScrollView *textScrollView;
+@property (unsafe_unretained) IBOutlet NSTextView *textView;
 
 @end
 
@@ -21,13 +24,21 @@
 
 - (void)applicationDidFinishLaunching:(NSNotification*)aNotification
 {
-    
+    self.textView.delegate = self;
+    NSString *path = [[NSBundle mainBundle] pathForResource:@"test.json" ofType:nil];
+    NSString *jsonStr = [NSString stringWithContentsOfFile:path encoding:NSUTF8StringEncoding error:nil];
+    TestModel *model = [TestModel mj_objectWithKeyValues:jsonStr.mj_JSONObject];
+    NSLog(@"%@",model);
+}
+
+#pragma mark - NSTextViewDelegate
+- (void)textDidChange:(NSNotification *)notification {
+    self.textView.textColor = [NSColor systemBlueColor];
 }
 
 - (IBAction)createClassFile:(id)sender
 {
     NSTextView* jsonTextView=(NSTextView*)self.textScrollView.contentView.documentView;
-    
     NSString* jsonStr=jsonTextView.textStorage.string;
     NSDictionary* dic = [self GetDictionaryWithJson:jsonStr];
     if (dic == nil) {
@@ -117,28 +128,28 @@
         for (PropertyModel* fieldsModel in createFileModel.fieldsArray) {
             NSString* fileStr;
             if ([fieldsModel.valueObject isKindOfClass:[NSString class]]) {
-                fileStr = [NSString stringWithFormat:@"@property (copy,nonatomic)   NSString *%@;\r\n", fieldsModel.keyObject];
+                fileStr = [NSString stringWithFormat:@"@property (nonatomic,copy)   NSString *%@;\r\n", fieldsModel.keyObject];
             }
             else if ([fieldsModel.valueObject isKindOfClass:[NSNumber class]]) {
-                fileStr = [NSString stringWithFormat:@"@property (strong,nonatomic) NSNumber *%@;\r\n", fieldsModel.keyObject];
+                fileStr = [NSString stringWithFormat:@"@property (nonatomic,strong) NSNumber *%@;\r\n", fieldsModel.keyObject];
             }
             else if ([fieldsModel.valueObject isKindOfClass:[NSArray class]]) {
-                fileStr = [NSString stringWithFormat:@"@property (strong,nonatomic) NSArray *%@;\r\n", fieldsModel.keyObject];
+                fileStr = [NSString stringWithFormat:@"@property (nonatomic,copy) NSArray *%@;\r\n", fieldsModel.keyObject];
                 
                 NSLog(@"fieldsModel.convertString:%@",fieldsModel.convertString);
                 if (convertString) {
                     convertString=[NSString stringWithFormat:@"%@,@\"%@\" : [%@ class]",convertString,fieldsModel.keyObject,fieldsModel.convertString!=nil?fieldsModel.convertString:@"NSString"];
                 }else{
-                    convertString=[NSString stringWithFormat:@"-(NSDictionary*)objectClassInArray{  \r\n       return @{ @\"%@\" : [%@ class] ", fieldsModel.keyObject,fieldsModel.convertString!=nil?fieldsModel.convertString:@"NSString"];
+                    convertString=[NSString stringWithFormat:@"+(NSDictionary*)mj_objectClassInArray{  \r\n       return @{ @\"%@\" : [%@ class] ", fieldsModel.keyObject,fieldsModel.convertString!=nil?fieldsModel.convertString:@"NSString"];
                 }
                 //                NSString* convertStr = [NSString stringWithFormat:@"-(NSDictionary*)objectClassInArray{  \r\n       return @{ @\"%@\" : [%@ class] }; \r\n}\r\n", fieldsModel.keyObject, fieldsModel.convertString];
                 //                pointMFileStr = [pointMFileStr stringByAppendingString:convertStr];
             }
             else {
                 if (fieldsModel.convertString) {
-                    fileStr = [NSString stringWithFormat:@"@property (strong,nonatomic) %@ *%@;\r\n",fieldsModel.convertString, fieldsModel.keyObject];
+                    fileStr = [NSString stringWithFormat:@"@property (nonatomic,strong) %@ *%@;\r\n",fieldsModel.convertString, fieldsModel.keyObject];
                 }else{
-                    fileStr = [NSString stringWithFormat:@"@property (strong,nonatomic) NSString *%@;\r\n", fieldsModel.keyObject];
+                    fileStr = [NSString stringWithFormat:@"@property (nonatomic,strong) NSString *%@;\r\n", fieldsModel.keyObject];
                 }
             }
             
