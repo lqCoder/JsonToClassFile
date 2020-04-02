@@ -31,6 +31,13 @@
     NSLog(@"%@",model);
 }
 
+//解决command+w关闭应用程序窗口之后 再次点击图标无法唤起应用的bug
+- (BOOL)applicationShouldHandleReopen:(NSApplication *)sender hasVisibleWindows:(BOOL)flag {
+    if(flag) return NO;
+    [self.window makeKeyAndOrderFront:self];
+    return YES;
+}
+
 #pragma mark - NSTextViewDelegate
 - (void)textDidChange:(NSNotification *)notification {
     self.textView.textColor = [NSColor systemBlueColor];
