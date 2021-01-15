@@ -52,7 +52,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		18CC8E9D1C3BC31D00FF3E67 /* JsToClassFile.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = JsToClassFile.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		18CC8E9D1C3BC31D00FF3E67 /* JSONToClassFile.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = JSONToClassFile.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		18CC8EA01C3BC31D00FF3E67 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		18CC8EA11C3BC31D00FF3E67 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
 		18CC8EA41C3BC31D00FF3E67 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
@@ -146,7 +146,7 @@
 		18CC8E9E1C3BC31D00FF3E67 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				18CC8E9D1C3BC31D00FF3E67 /* JsToClassFile.app */,
+				18CC8E9D1C3BC31D00FF3E67 /* JSONToClassFile.app */,
 				18CC8EB01C3BC31D00FF3E67 /* JsToClassFileTests.xctest */,
 				18CC8EBB1C3BC31D00FF3E67 /* JsToClassFileUITests.xctest */,
 			);
@@ -246,7 +246,7 @@
 			);
 			name = JsToClassFile;
 			productName = JsToClassFile;
-			productReference = 18CC8E9D1C3BC31D00FF3E67 /* JsToClassFile.app */;
+			productReference = 18CC8E9D1C3BC31D00FF3E67 /* JSONToClassFile.app */;
 			productType = "com.apple.product-type.application";
 		};
 		18CC8EAF1C3BC31D00FF3E67 /* JsToClassFileTests */ = {
@@ -514,7 +514,7 @@
 				INFOPLIST_FILE = JsToClassFile/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = Af.JsToClassFile;
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_NAME = JSONToClassFile;
 				PROVISIONING_PROFILE_SPECIFIER = "";
 			};
 			name = Debug;
@@ -530,7 +530,7 @@
 				INFOPLIST_FILE = JsToClassFile/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = Af.JsToClassFile;
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_NAME = JSONToClassFile;
 				PROVISIONING_PROFILE_SPECIFIER = "";
 			};
 			name = Release;
