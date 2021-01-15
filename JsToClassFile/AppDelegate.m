@@ -17,6 +17,7 @@
 
 @property (weak) IBOutlet NSScrollView *textScrollView;
 @property (unsafe_unretained) IBOutlet NSTextView *textView;
+@property (nonatomic,strong) NSProgressIndicator *indicator;
 
 @end
 
@@ -31,6 +32,10 @@
 //    NSString *jsonStr = [NSString stringWithContentsOfFile:path encoding:NSUTF8StringEncoding error:nil];
 //    TestModel *model = [TestModel mj_objectWithKeyValues:jsonStr.mj_JSONObject];
 //    NSLog(@"%@",model);
+    self.indicator = [[NSProgressIndicator alloc] initWithFrame:CGRectMake(self.textScrollView.bounds.size.width/2.0 - 25, self.textScrollView.bounds.size.height/2.0 - 25, 50, 50)];
+    self.indicator.style = NSProgressIndicatorStyleSpinning;
+    self.indicator.displayedWhenStopped = NO;
+    [self.textScrollView addSubview:self.indicator];
 }
 
 //解决command+w关闭应用程序窗口之后 再次点击图标无法唤起应用的bug
@@ -47,30 +52,53 @@
 
 - (IBAction)createClassFile:(id)sender
 {
+    //开启菊花
+    [self startProgress];
 //    NSTextView* jsonTextView=(NSTextView*)self.textScrollView.contentView.documentView;
     NSTextView* jsonTextView = self.textView;
-    NSString* jsonStr=jsonTextView.textStorage.string;
-    jsonStr = [self removeAnnotationString:jsonStr];
-    
-    NSDictionary* dic = [self GetDictionaryWithJson:jsonStr];
-    if (dic == nil) {
-        NSAlert *alert = [[NSAlert alloc] init];
-        alert.messageText = @"JSON格式错误";
-        alert.informativeText = @"请检查之后再试!";
-        [alert beginSheetModalForWindow:self.window completionHandler:nil];
-        return;
-    }
-    NSString* className = self.classText.stringValue;
-    if (className==nil||className.length<1) {
-        className=@"lqClass";
-    }
-    className=[self stringToClassName:className];
-    NSArray* keyArray = [dic allKeys];
+    __block NSString* jsonStr=jsonTextView.textStorage.string;
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        jsonStr = [self removeAnnotationString:jsonStr];
+        
+        NSDictionary* dic = [self GetDictionaryWithJson:jsonStr];
+        if (dic == nil) {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [self stopProgress];
+                NSAlert *alert = [[NSAlert alloc] init];
+                alert.messageText = @"JSON格式错误";
+                alert.informativeText = @"请检查之后再试!";
+                [alert beginSheetModalForWindow:self.window completionHandler:nil];
+            });
+            return;
+        }
+        dispatch_async(dispatch_get_main_queue(), ^{
+            NSString *className = self.classText.stringValue;
+            if (className==nil||className.length<1) {
+                className=@"lqClass";
+            }
+            className=[self stringToClassName:className];
+            NSArray* keyArray = [dic allKeys];
 
-    NSMutableArray* createFileModelArray = [[NSMutableArray alloc] init];
-    [self ergodicMethod:keyArray dataSourceDic:dic className:className createFileModelArray:createFileModelArray];
+            NSMutableArray* createFileModelArray = [[NSMutableArray alloc] init];
+            [self ergodicMethod:keyArray dataSourceDic:dic className:className createFileModelArray:createFileModelArray];
+            [self createJsonModelFily:createFileModelArray classFileName:className];
+            [self stopProgress];
+        });
+    });
+}
 
-    [self createJsonModelFily:createFileModelArray classFileName:className];
+- (void)startProgress {
+    self.textView.editable = NO;
+    self.textView.selectable = NO;
+    self.classText.enabled = NO;
+    [self.indicator startAnimation:nil];
+}
+
+- (void)stopProgress {
+    self.textView.editable = YES;
+    self.textView.selectable = YES;
+    self.classText.enabled = YES;
+    [self.indicator stopAnimation:nil];
 }
 
 //移除注释字符串
