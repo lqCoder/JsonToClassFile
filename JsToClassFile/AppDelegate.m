@@ -25,10 +25,12 @@
 - (void)applicationDidFinishLaunching:(NSNotification*)aNotification
 {
     self.textView.delegate = self;
-    NSString *path = [[NSBundle mainBundle] pathForResource:@"test.json" ofType:nil];
-    NSString *jsonStr = [NSString stringWithContentsOfFile:path encoding:NSUTF8StringEncoding error:nil];
-    TestModel *model = [TestModel mj_objectWithKeyValues:jsonStr.mj_JSONObject];
-    NSLog(@"%@",model);
+//    NSTextView解决不管是在中文还是英文输入状态下，输入的引号怎么都是中文的问题
+    self.textView.automaticQuoteSubstitutionEnabled = NO;
+//    NSString *path = [[NSBundle mainBundle] pathForResource:@"test.json" ofType:nil];
+//    NSString *jsonStr = [NSString stringWithContentsOfFile:path encoding:NSUTF8StringEncoding error:nil];
+//    TestModel *model = [TestModel mj_objectWithKeyValues:jsonStr.mj_JSONObject];
+//    NSLog(@"%@",model);
 }
 
 //解决command+w关闭应用程序窗口之后 再次点击图标无法唤起应用的bug
@@ -40,16 +42,22 @@
 
 #pragma mark - NSTextViewDelegate
 - (void)textDidChange:(NSNotification *)notification {
-    self.textView.textColor = [NSColor systemBlueColor];
+    self.textView.textColor = [NSColor whiteColor];
 }
 
 - (IBAction)createClassFile:(id)sender
 {
-    NSTextView* jsonTextView=(NSTextView*)self.textScrollView.contentView.documentView;
+//    NSTextView* jsonTextView=(NSTextView*)self.textScrollView.contentView.documentView;
+    NSTextView* jsonTextView = self.textView;
     NSString* jsonStr=jsonTextView.textStorage.string;
+    jsonStr = [self removeAnnotationString:jsonStr];
+    
     NSDictionary* dic = [self GetDictionaryWithJson:jsonStr];
     if (dic == nil) {
-        jsonTextView.string = @"JSON格式错误";
+        NSAlert *alert = [[NSAlert alloc] init];
+        alert.messageText = @"JSON格式错误";
+        alert.informativeText = @"请检查之后再试!";
+        [alert beginSheetModalForWindow:self.window completionHandler:nil];
         return;
     }
     NSString* className = self.classText.stringValue;
@@ -63,6 +71,18 @@
     [self ergodicMethod:keyArray dataSourceDic:dic className:className createFileModelArray:createFileModelArray];
 
     [self createJsonModelFily:createFileModelArray classFileName:className];
+}
+
+//移除注释字符串
+- (NSString *)removeAnnotationString:(NSString *)originalStr {
+    NSRange range = [originalStr rangeOfString:@"//"];
+    if(range.location != NSNotFound){
+        NSRange lineEndRange = [originalStr rangeOfString:@"\n" options:0 range:NSMakeRange(range.location, originalStr.length - range.location)];
+        originalStr = [originalStr stringByReplacingCharactersInRange:NSMakeRange(range.location, lineEndRange.location - range.location) withString:@""];
+        return [self removeAnnotationString:originalStr];
+    }else{
+        return originalStr;
+    }
 }
 
 - (void)ergodicMethod:(NSArray*)keyArray dataSourceDic:(NSDictionary*)dic className:(NSString*)className createFileModelArray:(NSMutableArray*)createFileModelArray
