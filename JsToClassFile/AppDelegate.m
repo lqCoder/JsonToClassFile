@@ -28,6 +28,8 @@
     self.textView.delegate = self;
 //    NSTextView解决不管是在中文还是英文输入状态下，输入的引号怎么都是中文的问题
     self.textView.automaticQuoteSubstitutionEnabled = NO;
+    self.textView.textColor = [NSColor blackColor];
+    self.classText.font = [NSFont systemFontOfSize:18 weight:NSFontWeightBold];
 //    NSString *path = [[NSBundle mainBundle] pathForResource:@"test.json" ofType:nil];
 //    NSString *jsonStr = [NSString stringWithContentsOfFile:path encoding:NSUTF8StringEncoding error:nil];
 //    TestModel *model = [TestModel mj_objectWithKeyValues:jsonStr.mj_JSONObject];
@@ -47,7 +49,7 @@
 
 #pragma mark - NSTextViewDelegate
 - (void)textDidChange:(NSNotification *)notification {
-    self.textView.textColor = [NSColor whiteColor];
+//    self.textView.textColor = [NSColor blackColor];
 }
 
 - (IBAction)createClassFile:(id)sender
@@ -58,7 +60,7 @@
     NSTextView* jsonTextView = self.textView;
     __block NSString* jsonStr=jsonTextView.textStorage.string;
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-        jsonStr = [self removeAnnotationString:jsonStr];
+//        jsonStr = [self removeAnnotationString:jsonStr];
         
         NSDictionary* dic = [self GetDictionaryWithJson:jsonStr];
         if (dic == nil) {
@@ -90,19 +92,20 @@
 - (void)startProgress {
     self.textView.editable = NO;
     self.textView.selectable = NO;
-    self.classText.enabled = NO;
+    self.classText.editable = NO;
     [self.indicator startAnimation:nil];
 }
 
 - (void)stopProgress {
     self.textView.editable = YES;
     self.textView.selectable = YES;
-    self.classText.enabled = YES;
+    self.classText.editable = YES;
     [self.indicator stopAnimation:nil];
 }
 
 //移除注释字符串
 - (NSString *)removeAnnotationString:(NSString *)originalStr {
+//    有问题不能这样操作 比如json字符串中含有https://有不行了
     NSRange range = [originalStr rangeOfString:@"//"];
     if(range.location != NSNotFound){
         NSRange lineEndRange = [originalStr rangeOfString:@"\n" options:0 range:NSMakeRange(range.location, originalStr.length - range.location)];

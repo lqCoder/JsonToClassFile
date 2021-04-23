@@ -15,7 +15,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "18CC8E9C1C3BC31D00FF3E67"
-               BuildableName = "JsToClassFile.app"
+               BuildableName = "JSONToClassFile.app"
                BlueprintName = "JsToClassFile"
                ReferencedContainer = "container:JsToClassFile.xcodeproj">
             </BuildableReference>
@@ -65,7 +65,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "18CC8E9C1C3BC31D00FF3E67"
-            BuildableName = "JsToClassFile.app"
+            BuildableName = "JSONToClassFile.app"
             BlueprintName = "JsToClassFile"
             ReferencedContainer = "container:JsToClassFile.xcodeproj">
          </BuildableReference>
@@ -82,7 +82,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "18CC8E9C1C3BC31D00FF3E67"
-            BuildableName = "JsToClassFile.app"
+            BuildableName = "JSONToClassFile.app"
             BlueprintName = "JsToClassFile"
             ReferencedContainer = "container:JsToClassFile.xcodeproj">
          </BuildableReference>
