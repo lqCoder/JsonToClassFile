@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Scheme
-   LastUpgradeVersion = "0720"
+   LastUpgradeVersion = "1230"
    version = "1.3">
    <BuildAction
       parallelizeBuildables = "YES"
@@ -15,7 +15,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "18CC8E9C1C3BC31D00FF3E67"
-               BuildableName = "JsToClassFile.app"
+               BuildableName = "JSONToClassFile.app"
                BlueprintName = "JsToClassFile"
                ReferencedContainer = "container:JsToClassFile.xcodeproj">
             </BuildableReference>
@@ -49,17 +49,6 @@
             </BuildableReference>
          </TestableReference>
       </Testables>
-      <MacroExpansion>
-         <BuildableReference
-            BuildableIdentifier = "primary"
-            BlueprintIdentifier = "18CC8E9C1C3BC31D00FF3E67"
-            BuildableName = "JsToClassFile.app"
-            BlueprintName = "JsToClassFile"
-            ReferencedContainer = "container:JsToClassFile.xcodeproj">
-         </BuildableReference>
-      </MacroExpansion>
-      <AdditionalOptions>
-      </AdditionalOptions>
    </TestAction>
    <LaunchAction
       buildConfiguration = "Debug"
@@ -76,13 +65,11 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "18CC8E9C1C3BC31D00FF3E67"
-            BuildableName = "JsToClassFile.app"
+            BuildableName = "JSONToClassFile.app"
             BlueprintName = "JsToClassFile"
             ReferencedContainer = "container:JsToClassFile.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
-      <AdditionalOptions>
-      </AdditionalOptions>
    </LaunchAction>
    <ProfileAction
       buildConfiguration = "Release"
@@ -95,7 +82,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "18CC8E9C1C3BC31D00FF3E67"
-            BuildableName = "JsToClassFile.app"
+            BuildableName = "JSONToClassFile.app"
             BlueprintName = "JsToClassFile"
             ReferencedContainer = "container:JsToClassFile.xcodeproj">
          </BuildableReference>
