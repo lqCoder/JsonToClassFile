@@ -73,6 +73,16 @@
             });
             return;
         }
+        if ([dic isKindOfClass:[NSArray class]]) {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [self stopProgress];
+                NSAlert *alert = [[NSAlert alloc] init];
+                alert.messageText = @"不是字典型的JSON";
+                alert.informativeText = @"请不要在最外层使用Array!";
+                [alert beginSheetModalForWindow:self.window completionHandler:nil];
+            });
+            return;
+        }
         dispatch_async(dispatch_get_main_queue(), ^{
             NSString *className = self.classText.stringValue;
             if (className==nil||className.length<1) {
