@@ -10,7 +10,7 @@
 #import "JSONKit.h"
 #import "MJExtension.h"
 #import "TestModel.h"
-
+//2
 @interface AppDelegate ()<NSTextViewDelegate>
 @property (weak) IBOutlet NSTextField* classText;
 @property (weak) IBOutlet NSWindow* window;
