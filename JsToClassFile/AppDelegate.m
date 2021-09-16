@@ -10,7 +10,7 @@
 #import "JSONKit.h"
 #import "MJExtension.h"
 #import "TestModel.h"
-//2
+
 @interface AppDelegate ()<NSTextViewDelegate>
 @property (weak) IBOutlet NSTextField* classText;
 @property (weak) IBOutlet NSWindow* window;
@@ -199,7 +199,9 @@
                 fileStr = [NSString stringWithFormat:@"@property (nonatomic,copy)   NSString *%@;\r\n", fieldsModel.keyObject];
             }
             else if ([fieldsModel.valueObject isKindOfClass:[NSNumber class]]) {
-                fileStr = [NSString stringWithFormat:@"@property (nonatomic,strong) NSNumber *%@;\r\n", fieldsModel.keyObject];
+//                fileStr = [NSString stringWithFormat:@"@property (nonatomic,strong) NSNumber *%@;\r\n", fieldsModel.keyObject];
+                //如果是NSNumber类型的也解析成NSString
+                fileStr = [NSString stringWithFormat:@"@property (nonatomic,copy)   NSString *%@;\r\n", fieldsModel.keyObject];
             }
             else if ([fieldsModel.valueObject isKindOfClass:[NSArray class]]) {
                 fileStr = [NSString stringWithFormat:@"@property (nonatomic,copy)   NSArray%@ *%@;\r\n", fieldsModel.convertString ? [NSString stringWithFormat:@"<%@ *>",fieldsModel.convertString]:@"<NSString *>",fieldsModel.keyObject];
