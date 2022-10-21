@@ -1,0 +1,8 @@
+source 'https://github.com/CocoaPods/Specs.git'
+
+target “SWExtension” do
+pod 'MBProgressHUD'
+
+pod 'SWExtension'
+
+end

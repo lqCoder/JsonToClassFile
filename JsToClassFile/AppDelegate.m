@@ -8,12 +8,16 @@
 #import "AppDelegate.h"
 #import "CreateFileModel.h"
 #import "JSONKit.h"
+#import "MJExtension.h"
+#import "TestModel.h"
 
-@interface AppDelegate ()
+@interface AppDelegate ()<NSTextViewDelegate>
 @property (weak) IBOutlet NSTextField* classText;
 @property (weak) IBOutlet NSWindow* window;
 
 @property (weak) IBOutlet NSScrollView *textScrollView;
+@property (unsafe_unretained) IBOutlet NSTextView *textView;
+@property (nonatomic,strong) NSProgressIndicator *indicator;
 
 @end
 
@@ -21,30 +25,105 @@
 
 - (void)applicationDidFinishLaunching:(NSNotification*)aNotification
 {
-    
+    self.textView.delegate = self;
+//    NSTextView解决不管是在中文还是英文输入状态下，输入的引号怎么都是中文的问题
+    self.textView.automaticQuoteSubstitutionEnabled = NO;
+    self.textView.textColor = [NSColor blackColor];
+    self.classText.font = [NSFont systemFontOfSize:18 weight:NSFontWeightBold];
+//    NSString *path = [[NSBundle mainBundle] pathForResource:@"test.json" ofType:nil];
+//    NSString *jsonStr = [NSString stringWithContentsOfFile:path encoding:NSUTF8StringEncoding error:nil];
+//    TestModel *model = [TestModel mj_objectWithKeyValues:jsonStr.mj_JSONObject];
+//    NSLog(@"%@",model);
+    self.indicator = [[NSProgressIndicator alloc] initWithFrame:CGRectMake(self.textScrollView.bounds.size.width/2.0 - 25, self.textScrollView.bounds.size.height/2.0 - 25, 50, 50)];
+    self.indicator.style = NSProgressIndicatorStyleSpinning;
+    self.indicator.displayedWhenStopped = NO;
+    [self.textScrollView addSubview:self.indicator];
+}
+
+//解决command+w关闭应用程序窗口之后 再次点击图标无法唤起应用的bug
+- (BOOL)applicationShouldHandleReopen:(NSApplication *)sender hasVisibleWindows:(BOOL)flag {
+    if(flag) return NO;
+    [self.window makeKeyAndOrderFront:self];
+    return YES;
+}
+
+#pragma mark - NSTextViewDelegate
+- (void)textDidChange:(NSNotification *)notification {
+//    self.textView.textColor = [NSColor blackColor];
 }
 
 - (IBAction)createClassFile:(id)sender
 {
-    NSTextView* jsonTextView=(NSTextView*)self.textScrollView.contentView.documentView;
-    
-    NSString* jsonStr=jsonTextView.textStorage.string;
-    NSDictionary* dic = [self GetDictionaryWithJson:jsonStr];
-    if (dic == nil) {
-        jsonTextView.string = @"JSON格式错误";
-        return;
-    }
-    NSString* className = self.classText.stringValue;
-    if (className==nil||className.length<1) {
-        className=@"lqClass";
-    }
-    className=[self stringToClassName:className];
-    NSArray* keyArray = [dic allKeys];
+    //开启菊花
+    [self startProgress];
+//    NSTextView* jsonTextView=(NSTextView*)self.textScrollView.contentView.documentView;
+    NSTextView* jsonTextView = self.textView;
+    __block NSString* jsonStr=jsonTextView.textStorage.string;
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+//        jsonStr = [self removeAnnotationString:jsonStr];
+        
+        NSDictionary* dic = [self GetDictionaryWithJson:jsonStr];
+        if (dic == nil) {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [self stopProgress];
+                NSAlert *alert = [[NSAlert alloc] init];
+                alert.messageText = @"JSON格式错误";
+                alert.informativeText = @"请检查之后再试!";
+                [alert beginSheetModalForWindow:self.window completionHandler:nil];
+            });
+            return;
+        }
+        if ([dic isKindOfClass:[NSArray class]]) {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [self stopProgress];
+                NSAlert *alert = [[NSAlert alloc] init];
+                alert.messageText = @"不是字典型的JSON";
+                alert.informativeText = @"请不要在最外层使用Array!";
+                [alert beginSheetModalForWindow:self.window completionHandler:nil];
+            });
+            return;
+        }
+        dispatch_async(dispatch_get_main_queue(), ^{
+            NSString *className = self.classText.stringValue;
+            if (className==nil||className.length<1) {
+                className=@"lqClass";
+            }
+            className=[self stringToClassName:className];
+            NSArray* keyArray = [dic allKeys];
 
-    NSMutableArray* createFileModelArray = [[NSMutableArray alloc] init];
-    [self ergodicMethod:keyArray dataSourceDic:dic className:className createFileModelArray:createFileModelArray];
+            NSMutableArray* createFileModelArray = [[NSMutableArray alloc] init];
+            [self ergodicMethod:keyArray dataSourceDic:dic className:className createFileModelArray:createFileModelArray];
+            [self createJsonModelFily:createFileModelArray classFileName:className];
+            [self stopProgress];
+        });
+    });
+}
 
-    [self createJsonModelFily:createFileModelArray classFileName:className];
+- (void)startProgress {
+    self.textView.editable = NO;
+    self.textView.selectable = NO;
+    self.classText.editable = NO;
+    [self.indicator startAnimation:nil];
+}
+
+- (void)stopProgress {
+    self.textView.editable = YES;
+    self.textView.selectable = YES;
+    self.classText.editable = YES;
+    [self.indicator stopAnimation:nil];
+}
+
+//移除注释字符串
+- (NSString *)removeAnnotationString:(NSString *)originalStr {
+//    有问题不能这样操作 比如json字符串中含有https://有不行了
+    NSRange range = [originalStr rangeOfString:@"//"];
+    if(range.location != NSNotFound){
+        NSRange lineEndRange = [originalStr rangeOfString:@"\n" options:0 range:NSMakeRange(range.location, originalStr.length - range.location)];
+        originalStr = [originalStr stringByReplacingCharactersInRange:NSMakeRange(range.location, lineEndRange.location - range.location) withString:@""];
+        return [self removeAnnotationString:originalStr];
+    }else{
+        return originalStr;
+    }
 }
 
 - (void)ergodicMethod:(NSArray*)keyArray dataSourceDic:(NSDictionary*)dic className:(NSString*)className createFileModelArray:(NSMutableArray*)createFileModelArray
@@ -117,28 +196,30 @@
         for (PropertyModel* fieldsModel in createFileModel.fieldsArray) {
             NSString* fileStr;
             if ([fieldsModel.valueObject isKindOfClass:[NSString class]]) {
-                fileStr = [NSString stringWithFormat:@"@property (copy,nonatomic)   NSString *%@;\r\n", fieldsModel.keyObject];
+                fileStr = [NSString stringWithFormat:@"@property (nonatomic,copy)   NSString *%@;\r\n", fieldsModel.keyObject];
             }
             else if ([fieldsModel.valueObject isKindOfClass:[NSNumber class]]) {
-                fileStr = [NSString stringWithFormat:@"@property (strong,nonatomic) NSNumber *%@;\r\n", fieldsModel.keyObject];
+//                fileStr = [NSString stringWithFormat:@"@property (nonatomic,strong) NSNumber *%@;\r\n", fieldsModel.keyObject];
+                //如果是NSNumber类型的也解析成NSString
+                fileStr = [NSString stringWithFormat:@"@property (nonatomic,copy)   NSString *%@;\r\n", fieldsModel.keyObject];
             }
             else if ([fieldsModel.valueObject isKindOfClass:[NSArray class]]) {
-                fileStr = [NSString stringWithFormat:@"@property (strong,nonatomic) NSArray *%@;\r\n", fieldsModel.keyObject];
+                fileStr = [NSString stringWithFormat:@"@property (nonatomic,copy)   NSArray%@ *%@;\r\n", fieldsModel.convertString ? [NSString stringWithFormat:@"<%@ *>",fieldsModel.convertString]:@"<NSString *>",fieldsModel.keyObject];
                 
                 NSLog(@"fieldsModel.convertString:%@",fieldsModel.convertString);
                 if (convertString) {
                     convertString=[NSString stringWithFormat:@"%@,@\"%@\" : [%@ class]",convertString,fieldsModel.keyObject,fieldsModel.convertString!=nil?fieldsModel.convertString:@"NSString"];
                 }else{
-                    convertString=[NSString stringWithFormat:@"-(NSDictionary*)objectClassInArray{  \r\n       return @{ @\"%@\" : [%@ class] ", fieldsModel.keyObject,fieldsModel.convertString!=nil?fieldsModel.convertString:@"NSString"];
+                    convertString=[NSString stringWithFormat:@"+ (NSDictionary *)mj_objectClassInArray{  \r\n       return @{ @\"%@\" : [%@ class] ", fieldsModel.keyObject,fieldsModel.convertString!=nil?fieldsModel.convertString:@"NSString"];
                 }
                 //                NSString* convertStr = [NSString stringWithFormat:@"-(NSDictionary*)objectClassInArray{  \r\n       return @{ @\"%@\" : [%@ class] }; \r\n}\r\n", fieldsModel.keyObject, fieldsModel.convertString];
                 //                pointMFileStr = [pointMFileStr stringByAppendingString:convertStr];
             }
             else {
                 if (fieldsModel.convertString) {
-                    fileStr = [NSString stringWithFormat:@"@property (strong,nonatomic) %@ *%@;\r\n",fieldsModel.convertString, fieldsModel.keyObject];
+                    fileStr = [NSString stringWithFormat:@"@property (nonatomic,strong) %@ *%@;\r\n",fieldsModel.convertString, fieldsModel.keyObject];
                 }else{
-                    fileStr = [NSString stringWithFormat:@"@property (strong,nonatomic) NSString *%@;\r\n", fieldsModel.keyObject];
+                    fileStr = [NSString stringWithFormat:@"@property (nonatomic,copy)   NSString *%@;\r\n", fieldsModel.keyObject];
                 }
             }
             
